@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <script src="/static/js/script.js"></script>
+    {% if title %}
+    <title>{{ title }} - Gartenlaube</title>
+    {% else %}
+    <title>Gartenlaube</title>
+    {% endif %}
+</head>
+<body>
+    <div class="background">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
