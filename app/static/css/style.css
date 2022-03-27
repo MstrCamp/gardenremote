@@ -1,28 +1,21 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+body {
     color: white;
 }
 
-h1 {
-    margin: 0;
-}
-
-div.background {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background-image: url("/static/img/background.jpg");
+.bg-image {
+    background-image: url('/img/background.jpg');
+    height: 100vh;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    background-color: red;
 }
 
-div.row {
-    display: block;
+.function-row {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    font-size: 1.5em;
 }
 
 input[type="checkbox"].switch {
@@ -36,6 +29,7 @@ input[type="checkbox"].switch {
     cursor: pointer;
     outline: none;
     transition: all .2s ease-in-out;
+    margin-right: 8px;
 }
 
 input[type="checkbox"].switch:checked {

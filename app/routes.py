@@ -29,4 +29,19 @@ def temp():
 
 @app.route('/remote')
 def remote():
-    return render_template('remote.html', title='Remote')
+    functions = ["Aussenlicht",
+                 "Finnhuette",
+                 "Pool Pumpe",
+                 "Pool Licht",
+                 "LED Licht",
+                 "Party Licht",
+                 "Vitrine",
+                 "3D Drucker",
+                 "Wasserboiler",
+                 "Rolladen"]
+    return render_template('remote.html', title='Remote', functions=functions)
+
+
+@app.route('/old')
+def old():
+    return render_template('old.html', title='[OLD] Remote')

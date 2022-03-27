@@ -1,17 +1,20 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row">
-    <label>
-        <input id="checkbox1" type="checkbox" class="switch" checked> Test
-    </label>
-</div>
-<div class="row">
-    <div class="lds-ring">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <img class="weather_img" width="153" height="70"
+                     src="https://w.bookcdn.com/weather/picture/26_18251_1_2_34495e_250_2c3e50_ffffff_ffffff_1_2071c9_ffffff_0_6.png?scode=2&domid=591&anc_id=69752"
+                     alt="booked.net"/>
+            </div>
+        </div>
+        {% for f in functions %}
+            <div class="row">
+                <label class="function-row">
+                    <input id="checkbox{{ loop.index }}" type="checkbox" class="switch" checked> {{ f }}
+                </label>
+            </div>
+        {% endfor %}
     </div>
-</div>
 {% endblock %}
