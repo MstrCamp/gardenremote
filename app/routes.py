@@ -1,30 +1,55 @@
-from flask import render_template, request, redirect
+import os
+import platform
+import sys
+
+from flask import abort, jsonify
+from flask import render_template, Response
+from werkzeug.exceptions import HTTPException
 
 from app import app
-from sensors import sensors
+from gpio.relay import relays, Relay, RelayState
+from gpio.sensor import sensors
+from sse.MessageAnnouncer import announcer
+from sse.util import format_sse
 
 
-@app.route('/')
-@app.route('/index')
-def index():
-    user = {'username': 'Erik'}
-    posts = [
-        {
-            'author': {'username': 'Emanuel'},
-            'body': 'Sonniges Wetter in Dresden!'
-        },
-    ]
-    return render_template('index.html', title='Home', user=user, posts=posts)
+@app.route('/sensor/<device>')
+@app.route('/sensor/<device>/<prop>')
+def sensor(device: str, prop: str = None):
+    if device.lower() == "all":
+        return jsonify(sensors=dict([(key, value.serialize()) for key, value in sensors.items()]))
+    if device in sensors:
+        print("In section single".format(device, str), file=sys.stderr)
+        sensor = sensors.get(device)
+        if prop is None:
+            return jsonify(sensor.serialize())
+        if hasattr(sensor, prop):
+            return str(getattr(sensors.get(device), prop))
+    abort(404)
 
 
-@app.route('/value')
-def value():
-    return request.args.get('value')
+@app.route('/relay/<device>')
+@app.route('/relay/<device>/<function>')
+def relay(device: str, function: str = None):
+    if device.lower() == "all":
+        return jsonify(relays=dict([(key, value.serialize()) for key, value in relays.items()]))
+    elif device not in relays:
+        abort(404)
+    r: Relay = relays.get(device)
 
-
-@app.route('/temp')
-def temp():
-    return str(sensors.get_temp_indoor())
+    if function is None:
+        return jsonify(r.serialize())
+    else:
+        function = function.lower()
+        if function == "toggle":
+            r.toggle()
+        elif function == "on":
+            r.state = RelayState.ON
+        elif function == "off":
+            r.state = RelayState.OFF
+        else:
+            abort(404)
+        return jsonify(r.serialize())
 
 
 @app.route('/remote')
@@ -42,6 +67,44 @@ def remote():
     return render_template('remote.html', title='Remote', functions=functions)
 
 
-@app.route('/old')
-def old():
-    return render_template('old.html', title='[OLD] Remote')
+@app.route('/os')
+def route_os():
+    return {
+        "Name of the operating system:": os.name,
+        "Name of the OS system:": platform.system(),
+        "Version of the operating system:": platform.release()
+    }
+
+
+@app.route('/ping')
+def ping():
+    msg = format_sse(data='pong')
+    announcer.announce(msg=msg)
+    return {}, 200
+
+
+@app.route('/listen', methods=['GET'])
+def listen():
+    def stream():
+        messages = announcer.listen()  # returns a queue.Queue
+        while True:
+            msg = messages.get()  # blocks until a new message arrives
+            yield msg
+
+    return Response(stream(), mimetype='text/event-stream')
+
+
+@app.route('/test')
+def test():
+    abort(409)
+
+
+@app.errorhandler(Exception)
+def handle_error(e):
+    code = 500
+    if isinstance(e, HTTPException):
+        code = e.code
+        return render_template("error.html", code=code, reason=e.name)
+    else:
+        return render_template("error.html", code=500, reason=str(e))
+    # return jsonify(error=str(e)), code
