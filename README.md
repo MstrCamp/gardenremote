@@ -57,3 +57,13 @@ Enable the new Configuration and disable the old default one
 ```
 sudo a2dissite 000-default.conf && sudo a2ensite GardenRemote.conf && sudo systemctl reload apache2
 ```
+
+## Development
+### Pycharm Remote Interpreter
+Manually create venv, install requirements and place file inside */venv*:
+```bash
+#!/bin/bash
+source /home/pi/GardenRemote/venv/bin/activate
+python "$@"
+```
+Configure file as Remote Interpreter
