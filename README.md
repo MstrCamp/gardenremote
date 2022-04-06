@@ -16,6 +16,12 @@ Put user www-data in group gpio
 sudo usermod -a -G gpio www-data
 ```
 
+Allow server access to log folder by executing:
+```
+sudo chown -R pi:www-data /home/pi/GardenRemote/log/
+sudo chmod 775 /home/pi/GardenRemote/log/
+```
+
 allow acces to server directory in */etc/apache2/apache2.conf*
 ```apache
 <Directory /home/pi/GardenRemote>
