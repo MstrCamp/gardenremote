@@ -83,7 +83,7 @@ class Sensor:
         }
 
 
-def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 10) -> Union[int, float, None]:
+def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) -> Union[int, float, None]:
     """tries to read value from sensor until it succeeds. If no max retry value is given tries for a maximum of 10
     times """
     if max_retry <= 0:
@@ -92,6 +92,8 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 10) 
     while True:
         try:
             value = get()
+            if value is None:
+                raise RuntimeError
         except RuntimeError as e:
             logging.info("Reading from Sensor failed. Reason: {reason} Retrying...".format(reason=e))
             max_retry -= 1
