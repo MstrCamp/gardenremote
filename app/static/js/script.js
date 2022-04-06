@@ -13,5 +13,11 @@ window.onload = () => {
             }
         }
     }
+
+    const evtSource = new EventSource("listen");
+    evtSource.onmessage = (event) => {
+        console.log(event)
+    }
+
 }
 
