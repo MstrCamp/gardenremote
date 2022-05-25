@@ -7,7 +7,7 @@ import os
 import sys
 
 
-def log_setup(base_path):
+def log_setup(base_path: str):
     log_handler = logging.handlers.RotatingFileHandler(base_path + '/log/app.log', maxBytes=10000000, backupCount=5)
     formatter = logging.Formatter(
         '%(asctime)s [%(process)d]: %(message)s',

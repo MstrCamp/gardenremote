@@ -85,5 +85,5 @@ if __name__ == "__main__":
     for i in range(6):
         for key, value in relays.items():
             value.toggle()
-            print("{} should be: {}".format(key, value.state))
+            print(f"{key} should be: {value.state}")
         sleep(0.5)

@@ -1,5 +1,10 @@
-def format_sse(data: str, event=None) -> str:
+from typing import List, NewType
+
+MessageSSE = NewType("MessageSSE", str)
+
+
+def format_sse(data: str, event=None) -> MessageSSE:
     msg = f'data: {data}\n\n'
     if event is not None:
         msg = f'event: {event}\n{msg}'
-    return msg
+    return MessageSSE(msg)

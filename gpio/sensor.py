@@ -95,7 +95,7 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) 
             if value is None:
                 raise RuntimeError
         except RuntimeError as e:
-            logging.info("Reading from Sensor failed. Reason: {reason} Retrying...".format(reason=e))
+            logging.info(f"Reading from Sensor failed. Reason: {e} Retrying...")
             max_retry -= 1
             if max_retry > 0:
                 continue
@@ -111,5 +111,5 @@ sensors: dict[str, Sensor] = {
 if __name__ == "__main__":
     sensor = sensors.get("indoor")
 
-    print("Temp: {}°C".format(sensor.temperature))
-    print("Hum:  {}%".format(sensor.humidity))
+    print(f"Temp: {sensor.temperature}°C")
+    print(f"Hum:  {sensor.humidity}%")
