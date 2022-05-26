@@ -13,7 +13,6 @@ class MessageAnnouncer:
         return q
 
     def announce(self, msg: MessageSSE):
-        print(self.listeners)
         for i in reversed(range(len(self.listeners))):
             try:
                 self.listeners[i].put_nowait(msg)
