@@ -60,8 +60,17 @@ function setupEventSource() {
  * @param event {MessageEvent}
  */
 function handleSSE(event) {
-    //console.log(event)
-    log(event.data)
+    try {
+        const data = JSON.parse(event.data)
+        if (data['ttype'] === "SENSOR") {
+            console.log(data['ccontent'])
+        } else {
+            log(`Cannot handle data type ${data['ttype']}`)
+        }
+    } catch (e) {
+        log(`Error while trying to parse event: ${e.message}`)
+        log(event.data)
+    }
 }
 
 /**
