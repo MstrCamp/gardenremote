@@ -6,6 +6,7 @@ let evtSource; // SSE event source
  */
 function setup() {
     if (window.location.pathname !== "/remote") return;
+
     log("Setting up remote...")
     for (let i = 0; i < 11; i++) {
         const checkBox = document.getElementById('checkbox' + i);
@@ -25,6 +26,8 @@ function setup() {
     // listen to server sent events for changes in relay states or other events
     setupEventSource();
 
+    // reload weather forecast every hour
+    setInterval(reloadWeatherForecast, 60 * 60 * 1000 /* every hour */);
 }
 
 /**
@@ -61,6 +64,16 @@ function handleSSE(event) {
     log(event.data)
 }
 
+/**
+ * Reloads the small weather forecast image
+ */
+function reloadWeatherForecast() {
+    log("Reloading weather forecast...")
+    let url = 'https://w.bookcdn.com/weather/picture/26_18251_1_2_34495e_250_2c3e50_ffffff_ffffff_1_2071c9_ffffff_0_6.png?scode=2&domid=591&anc_id=69752';
+    const img = document.getElementById('weather_img');
+    url = url + '?' + new Date().getTime(); // append timestamp to ensure that image is really refetched and not taken from cache
+    img.src = url;
+}
 
 /**
  * Prints the current timestamp and the given message. Use instead of console.log

@@ -20,10 +20,10 @@ def sensor(device: str, prop: str = None):
         return jsonify(sensors=dict([(key, value.serialize()) for key, value in sensors.items()]))
     if device in sensors:
         print("In section single".format(device, str), file=sys.stderr)
-        sensor = sensors.get(device)
+        s = sensors.get(device)
         if prop is None:
-            return jsonify(sensor.serialize())
-        if hasattr(sensor, prop):
+            return jsonify(s.serialize())
+        if hasattr(s, prop):
             return str(getattr(sensors.get(device), prop))
     abort(404)
 
