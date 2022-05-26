@@ -1,6 +1,6 @@
-Flask~=2.1.1
+Flask~=2.1.2
 Flask-APScheduler~=1.12.3
 python-dotenv~=0.20.0
-Adafruit-Blinka~=7.2.0
+Adafruit-Blinka~=7.3.0
 adafruit-circuitpython-dht~=3.7.2
-Werkzeug~=2.1.1
+Werkzeug~=2.1.2

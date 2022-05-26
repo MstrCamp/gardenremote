@@ -29,4 +29,6 @@ scheduler = APScheduler()
 scheduler.init_app(app)
 scheduler.start()
 
+
 from app import routes
+from app import jobs
