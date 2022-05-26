@@ -94,17 +94,15 @@ def listen():
     return Response(stream(), mimetype='text/event-stream')
 
 
-@app.route('/test')
-def test():
-    abort(409)
+@app.route('/coffee')
+def coffee():
+    abort(418)
 
 
 @app.errorhandler(Exception)
 def handle_error(e):
-    code = 500
     if isinstance(e, HTTPException):
         code = e.code
         return render_template("error.html", code=code, reason=e.name)
     else:
         return render_template("error.html", code=500, reason=str(e))
-    # return jsonify(error=str(e)), code
