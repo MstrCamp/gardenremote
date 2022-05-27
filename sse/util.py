@@ -1,6 +1,6 @@
-from typing import NewType, Dict
-from enum import Enum
 import json
+from enum import Enum
+from typing import NewType, Dict
 
 MessageSSE = NewType("MessageSSE", str)
 
@@ -8,6 +8,7 @@ MessageSSE = NewType("MessageSSE", str)
 class MessageType(Enum):
     SENSOR = 1
     RELAY = 2
+    SHUTTER = 3
 
 
 def format_sse(data: str, event=None) -> MessageSSE:
@@ -17,7 +18,7 @@ def format_sse(data: str, event=None) -> MessageSSE:
     return MessageSSE(msg)
 
 
-def dataToJson(mtype: MessageType, content: Dict):
+def dataToJson(mtype: MessageType, content: Dict) -> str:
     return json.dumps({
         "type": mtype.name,
         "content": content

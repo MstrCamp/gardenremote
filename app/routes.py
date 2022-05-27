@@ -1,5 +1,3 @@
-import os
-import platform
 import sys
 
 from flask import abort, jsonify
@@ -7,10 +5,10 @@ from flask import render_template, Response
 from werkzeug.exceptions import HTTPException
 
 from app import app
-from gpio.relay import relays, Relay, RelayState
+from gpio.relay import relays, shutters, Relay, RelayState, broadcast_states, ShutterState, ManagedShutter, \
+    broadcast_shutters, ManagementState
 from gpio.sensor import sensors
 from sse.MessageAnnouncer import announcer
-from sse.util import format_sse
 
 
 @app.route('/sensor/<device>')
@@ -37,9 +35,7 @@ def relay(device: str, function: str = None):
         abort(404)
     r: Relay = relays.get(device)
 
-    if function is None:
-        return jsonify(r.serialize())
-    else:
+    if function is not None:
         function = function.lower()
         if function == "toggle":
             r.toggle()
@@ -49,38 +45,43 @@ def relay(device: str, function: str = None):
             r.state = RelayState.OFF
         else:
             abort(404)
-        return jsonify(r.serialize())
+        broadcast_states()
+
+    return jsonify(r.serialize())
+
+
+@app.route('/shutter/<device>')
+@app.route('/shutter/<device>/<function>')
+def shutter(device: str, function: str = None):
+    if device.lower() == "all":
+        return jsonify(shutters=dict([(key, value.serialize()) for key, value in shutters.items()]))
+    elif device not in shutters:
+        abort(404)
+    s: ManagedShutter = shutters.get(device)
+    if function is not None:
+        function = function.lower()
+        if function == "toggle":
+            s.toggle_shutter()
+        elif function == "open":
+            s.state = ShutterState.OPEN
+        elif function == "close":
+            s.state = ShutterState.CLOSED
+        elif function == "toggle_management":
+            s.toggle_management_state()
+        elif function == "auto":
+            s.management_state = ManagementState.AUTO
+        elif function == "manual":
+            s.management_state = ManagementState.MANUAL
+        else:
+            abort(404)
+        broadcast_shutters()
+
+    return jsonify(s.serialize())
 
 
 @app.route('/remote')
 def remote():
-    functions = ["Aussenlicht",
-                 "Finnhuette",
-                 "Pool Pumpe",
-                 "Pool Licht",
-                 "LED Licht",
-                 "Party Licht",
-                 "Vitrine",
-                 "3D Drucker",
-                 "Wasserboiler",
-                 "Rolladen"]
-    return render_template('remote.html', title='Remote', functions=functions)
-
-
-@app.route('/os')
-def route_os():
-    return {
-        "Name of the operating system:": os.name,
-        "Name of the OS system:": platform.system(),
-        "Version of the operating system:": platform.release()
-    }
-
-
-@app.route('/ping')
-def ping():
-    msg = format_sse(data='pong')
-    announcer.announce(msg=msg)
-    return {}, 200
+    return render_template('remote.html', title='Remote', sensors=sensors, relays=relays, shutters=shutters)
 
 
 @app.route('/listen', methods=['GET'])

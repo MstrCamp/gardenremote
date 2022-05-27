@@ -5,7 +5,8 @@ from os import environ
 from typing import Callable
 from typing import Union
 
-from gpio.mock import *
+from sse.MessageAnnouncer import announcer
+from sse.util import format_sse, dataToJson, MessageType
 
 if environ.get('SENSORS_UNAVAILABLE') == '1':
     logging.info("Using Mock Sensors instead of real ones")
@@ -104,9 +105,16 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) 
 
 
 sensors: dict[str, Sensor] = {
-    "indoor": Sensor("Innen", SensorType.DHT11, D2),
-    # "outdoor": Sensor("Außen", SensorType.DHT11, D3)
+    "sensor_indoor": Sensor("Innen", SensorType.DHT11, D2),
+    # "indoor": Sensor("Innen", SensorType.MOCK),
+    "sensor_outdoor": Sensor("Außen", SensorType.MOCK)
 }
+
+
+def broadcast_data():
+    announcer.announce(
+        format_sse(dataToJson(MessageType.SENSOR, dict([(key, value.serialize()) for key, value in sensors.items()]))))
+
 
 if __name__ == "__main__":
     sensor = sensors.get("indoor")

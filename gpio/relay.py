@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import logging
+import threading
+import time
 from enum import Enum
 from os import environ
-from random import choice
+
+from sse.MessageAnnouncer import announcer
+from sse.util import format_sse, dataToJson, MessageType
 
 if environ.get('SENSORS_UNAVAILABLE') == '1':
     logging.debug("Using Mock Sensors instead of real ones")
@@ -22,10 +26,26 @@ class RelayState(Enum):
         return RelayState(not self.value)
 
 
+class ManagementState(Enum):
+    MANUAL = False
+    AUTO = True
+
+    def other(self) -> ManagementState:
+        return ManagementState(not self.value)
+
+
+class ShutterState(Enum):
+    CLOSED = False
+    OPEN = True
+
+    def other(self) -> ShutterState:
+        return ShutterState(not self.value)
+
+
 class MockRelay:
     def __init__(self, initial_state: bool = None):
         if initial_state is None:
-            self.state = choice([True, False])
+            self.state = True  # choice([True, False])
         else:
             self.state = initial_state
 
@@ -34,8 +54,8 @@ class MockRelay:
         return self.state
 
     @value.setter
-    def value(self, value: bool):
-        self.state = value
+    def value(self, val: bool):
+        self.state = val
 
 
 class Relay:
@@ -59,6 +79,13 @@ class Relay:
     def state(self, state: RelayState):
         self.io.value = state.value
 
+    def html_state(self) -> str:
+        """Convenience function for setting initial state of html checkbox"""
+        if self.state == RelayState.ON:
+            return "checked"
+        else:
+            return ""
+
     def toggle(self) -> RelayState:
         """toggles the state of the relay, returns the new relaystate"""
         self.io.value = not self.io.value
@@ -71,10 +98,86 @@ class Relay:
         }
 
 
+class Button(Relay):
+    """ Relay, that toggles back after a second """
+
+    def __init__(self, name: str, pin: Pin = None, initial_state: RelayState = None):
+        super(Button, self).__init__(name, pin, initial_state)
+        self.lock = threading.Lock()
+
+    def press(self):
+        with self.lock:
+            self.state = RelayState.ON
+            time.sleep(1)
+            self.state = RelayState.OFF
+
+
+class ManagedShutter:
+    def __init__(self, name: str, pin_open: Pin = None, pin_close: Pin = None, initial_state: ShutterState = None,
+                 management_state: ManagementState = ManagementState.AUTO):
+        self.name = name
+        self.open_button = Button("open", pin_open, RelayState.OFF)
+        self.close_button = Button("close", pin_close, RelayState.OFF)
+        if initial_state is not None:
+            self._state = initial_state
+        else:
+            self._state = ShutterState.OPEN
+        self.management_state = management_state
+
+    @property
+    def state(self) -> ShutterState:
+        return self._state
+
+    @state.setter
+    def state(self, state: ShutterState):
+        self._state = state
+        if state == ShutterState.OPEN:
+            self.open_button.press()
+        else:
+            self.close_button.press()
+
+    def toggle_shutter(self):
+        self.state = self.state.other()
+
+    def toggle_management_state(self):
+        self.management_state = self.management_state.other()
+
+    def serialize(self):
+        return {
+            "name": self.name,
+            "state": self.state.name,
+            "management_state": self.management_state.name
+        }
+
+
 relays: dict[str, Relay] = {
-    "pool_lights": Relay("Pool Licht", D14),
-    "outdoor_lights": Relay("Außenlicht", D15)
+    "relay_pool_lights": Relay("Pool Licht"),
+    "relay_outdoor_lights": Relay("Außenlicht"),
+    "relay_cabin": Relay("Finnhuette", initial_state=RelayState.ON),
+    "relay_pool_pump": Relay("Pool Pumpe"),
+    "relay_led_lights": Relay("LED Licht"),
+    "relay_party_lights": Relay("Party Licht", initial_state=RelayState.ON),
+    "relay_cabinet": Relay("Vitrine", initial_state=RelayState.ON),
+    "relay_3dprinter": Relay("3D Drucker"),
+    "relay_boiler": Relay("Wasserboiler"),
 }
+
+
+def broadcast_states():
+    announcer.announce(
+        format_sse(dataToJson(MessageType.RELAY, dict([(key, value.serialize()) for key, value in relays.items()]))))
+
+
+shutters: dict[str, ManagedShutter] = {
+    "shutter_main": ManagedShutter("Rollladen", D14, D15, management_state=ManagementState.AUTO)
+}
+
+
+def broadcast_shutters():
+    announcer.announce(
+        format_sse(
+            dataToJson(MessageType.SHUTTER, dict([(key, value.serialize()) for key, value in shutters.items()]))))
+
 
 if __name__ == "__main__":
     from time import sleep

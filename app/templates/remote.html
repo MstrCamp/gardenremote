@@ -1,20 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="container">
+<div class="container">
+    <div class="container-fluid">
         <div class="row">
             <div class="col">
-                <img id="weather_img" class="weather_img" width="153" height="70"
+                <img id="weather_img" class="img-fluid" width="153" height="70"
                      src="https://w.bookcdn.com/weather/picture/26_18251_1_2_34495e_250_2c3e50_ffffff_ffffff_1_2071c9_ffffff_0_6.png?scode=2&domid=591&anc_id=69752"
                      alt="booked.net"/>
             </div>
-        </div>
-        {% for f in functions %}
-            <div class="row">
-                <label class="function-row">
-                    <input id="checkbox{{ loop.index }}" type="checkbox" class="switch" checked> {{ f }}
-                </label>
+            <div class="col">
+                {% for key, value in sensors.items() %}
+                <div class="row"><p id="{{ key }}" class="sensor-row">{{ value.name }}: {{value.temperature}}° /
+                    {{value.humidity}}%</p></div>
+                {% endfor %}
             </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        {% for key, value in relays.items() %}
+        <div class="row">
+            <label id="label_{{ key }}" class="function-row">
+                <input id="{{ key }}" type="checkbox" class="switch" {{ "checked" if not value.state.value }}> {{
+                value.name }}
+            </label>
+        </div>
+        {% endfor %}
+        {% for key, value in shutters.items() %}
+        <div class="row">
+            <div class="function-row">
+                <input id="checkbox_{{ key }}" type="checkbox" class="switch" {{ "checked" if not value.state.value }}>
+                <label id="label_{{ key }}" for="checkbox_{{ key }}">{{ value.name }}</label>
+                <i id="button_{{ key }}_open" class="css-button gg-arrow-up-o"></i>
+                <i id="button_{{ key }}_close" class="css-button gg-arrow-down-o"></i>
+            </div>
+
+        </div>
         {% endfor %}
     </div>
+</div>
 {% endblock %}
