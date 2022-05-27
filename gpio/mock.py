@@ -3,6 +3,14 @@ class Pin:
         self.pin = pin
 
 
+class ContextManaged:
+    pass
+
+
+class DigitalInOut(ContextManaged):
+    pass
+
+
 class DHTBase:
     pass
 

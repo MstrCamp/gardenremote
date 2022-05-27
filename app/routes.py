@@ -7,7 +7,7 @@ from werkzeug.exceptions import HTTPException
 from app import app
 from gpio.relay import relays, shutters, Relay, RelayState, broadcast_states, ShutterState, ManagedShutter, \
     broadcast_shutters, ManagementState
-from gpio.sensor import sensors
+from gpio.sensor import temp_sensors
 from sse.MessageAnnouncer import announcer
 
 
@@ -15,14 +15,14 @@ from sse.MessageAnnouncer import announcer
 @app.route('/sensor/<device>/<prop>')
 def sensor(device: str, prop: str = None):
     if device.lower() == "all":
-        return jsonify(sensors=dict([(key, value.serialize()) for key, value in sensors.items()]))
-    if device in sensors:
+        return jsonify(sensors=dict([(key, value.serialize()) for key, value in temp_sensors.items()]))
+    if device in temp_sensors:
         print("In section single".format(device, str), file=sys.stderr)
-        s = sensors.get(device)
+        s = temp_sensors.get(device)
         if prop is None:
             return jsonify(s.serialize())
         if hasattr(s, prop):
-            return str(getattr(sensors.get(device), prop))
+            return str(getattr(temp_sensors.get(device), prop))
     abort(404)
 
 
@@ -40,9 +40,9 @@ def relay(device: str, function: str = None):
         if function == "toggle":
             r.toggle()
         elif function == "on":
-            r.state = RelayState.ON
+            r.on()
         elif function == "off":
-            r.state = RelayState.OFF
+            r.off()
         else:
             abort(404)
         broadcast_states()
@@ -63,15 +63,15 @@ def shutter(device: str, function: str = None):
         if function == "toggle":
             s.toggle_shutter()
         elif function == "open":
-            s.state = ShutterState.OPEN
+            s.open()
         elif function == "close":
-            s.state = ShutterState.CLOSED
+            s.close()
         elif function == "toggle_management":
             s.toggle_management_state()
         elif function == "auto":
-            s.management_state = ManagementState.AUTO
+            s.auto()
         elif function == "manual":
-            s.management_state = ManagementState.MANUAL
+            s.manual()
         else:
             abort(404)
         broadcast_shutters()
@@ -81,7 +81,7 @@ def shutter(device: str, function: str = None):
 
 @app.route('/remote')
 def remote():
-    return render_template('remote.html', title='Remote', sensors=sensors, relays=relays, shutters=shutters)
+    return render_template('remote.html', title='Remote', sensors=temp_sensors, relays=relays, shutters=shutters)
 
 
 @app.route('/listen', methods=['GET'])

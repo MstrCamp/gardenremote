@@ -79,12 +79,11 @@ class Relay:
     def state(self, state: RelayState):
         self.io.value = state.value
 
-    def html_state(self) -> str:
-        """Convenience function for setting initial state of html checkbox"""
-        if self.state == RelayState.ON:
-            return "checked"
-        else:
-            return ""
+    def on(self):
+        self.state = RelayState.ON
+
+    def off(self):
+        self.state = RelayState.OFF
 
     def toggle(self) -> RelayState:
         """toggles the state of the relay, returns the new relaystate"""
@@ -136,11 +135,37 @@ class ManagedShutter:
         else:
             self.close_button.press()
 
+    @property
+    def is_open(self) -> bool:
+        return self.state.value
+
+    @property
+    def is_closed(self) -> bool:
+        return not self.state.value
+
     def toggle_shutter(self):
         self.state = self.state.other()
 
+    def open(self):
+        if self.is_closed:
+            self.state = ShutterState.OPEN
+
+    def close(self):
+        if self.is_open:
+            self.state = ShutterState.CLOSED
+
     def toggle_management_state(self):
         self.management_state = self.management_state.other()
+
+    @property
+    def is_managed(self) -> bool:
+        return self.management_state.value
+
+    def manual(self):
+        self.management_state = ManagementState.MANUAL
+
+    def auto(self):
+        self.management_state = ManagementState.AUTO
 
     def serialize(self):
         return {

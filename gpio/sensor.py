@@ -45,8 +45,8 @@ class MockDHT:
         return random.randrange(0, 100)
 
 
-class SensorType(Enum):
-    MOCK = MockDHT
+class SensorTypeTemperature(Enum):
+    MOCK = MockDHT,
     DHT11 = DHT11,
     DHT21 = DHT21,
     DHT22 = DHT22
@@ -55,11 +55,11 @@ class SensorType(Enum):
         self.clazz = clazz
 
 
-class Sensor:
-    """Wraps functionality of DHT11 Sensors to improve reliability of reading values. If """
+class TemperatureSensor:
+    """Wraps functionality of DHT11 Sensors to improve reliability of reading values."""
     s: Union[MockDHT, DHTBase]
 
-    def __init__(self, name: str, sensor_type: SensorType = SensorType.MOCK, pin: Pin = None):
+    def __init__(self, name: str, sensor_type: SensorTypeTemperature = SensorTypeTemperature.MOCK, pin: Pin = None):
         self.name = name
         if environ.get('SENSORS_UNAVAILABLE') == '1' or pin is None:
             self.s = MockDHT()
@@ -84,6 +84,56 @@ class Sensor:
         }
 
 
+class LightState(Enum):
+    NIGHT = False,
+    DAY = True
+
+    @property
+    def is_day(self) -> bool:
+        return self.value
+
+    @property
+    def is_night(self) -> bool:
+        return not self.value
+
+
+class MockDigitaInOut:
+    """Mocks the function of a digital input for testing and development purposes"""
+
+    # noinspection PyUnusedLocal
+    def __init__(self, pin: Pin = None):
+        """Construtor to mimic constructors of real Sensor classes"""
+        pass
+
+    @property
+    def value(self) -> bool:
+        return random.choice([True, False])
+
+
+class SensorTypeLight(Enum):
+    MOCK = MockDigitaInOut,
+    REAL = DigitalInOut
+
+    def __init__(self, clazz):
+        self.clazz = clazz
+
+
+class LightSensor:
+    """Wraps functionality of light sensors to improve reliability of reading values."""
+    s: Union[DigitalInOut, MockDigitaInOut]
+
+    def __init__(self, name: str, sensor_type: SensorTypeLight = SensorTypeLight.MOCK, pin: Pin = None):
+        self.name = name
+        if environ.get('SENSORS_UNAVAILABLE') == '1' or pin is None:
+            self.s = MockDigitaInOut()
+        else:
+            self.s = sensor_type.clazz(pin)
+
+    @property
+    def state(self) -> LightState:
+        return LightState(self.s.value)
+
+
 def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) -> Union[int, float, None]:
     """tries to read value from sensor until it succeeds. If no max retry value is given tries for a maximum of 10
     times """
@@ -104,20 +154,27 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) 
     return value
 
 
-sensors: dict[str, Sensor] = {
-    "sensor_indoor": Sensor("Innen", SensorType.DHT11, D2),
+temp_sensors: dict[str, TemperatureSensor] = {
+    "sensor_indoor": TemperatureSensor("Innen", SensorTypeTemperature.DHT11, D2),
     # "indoor": Sensor("Innen", SensorType.MOCK),
-    "sensor_outdoor": Sensor("Außen", SensorType.MOCK)
+    "sensor_outdoor": TemperatureSensor("Außen", SensorTypeTemperature.MOCK)
+}
+
+light_sensors: dict[str, LightSensor] = {
+    "light_outdoor": LightSensor("Außenlicht", sensor_type=SensorTypeLight.MOCK)
 }
 
 
 def broadcast_data():
     announcer.announce(
-        format_sse(dataToJson(MessageType.SENSOR, dict([(key, value.serialize()) for key, value in sensors.items()]))))
+        format_sse(
+            dataToJson(MessageType.SENSOR, dict([(key, value.serialize()) for key, value in temp_sensors.items()]))))
 
 
 if __name__ == "__main__":
-    sensor = sensors.get("indoor")
-
+    sensor = temp_sensors.get("sensor_indoor")
     print(f"Temp: {sensor.temperature}°C")
     print(f"Hum:  {sensor.humidity}%")
+
+    sensor = light_sensors.get("light_outdoor")
+    print(f"Light:  {sensor.state}")
