@@ -176,15 +176,17 @@ class ManagedShutter:
 
 
 relays: dict[str, Relay] = {
-    "relay_pool_lights": Relay("Pool Licht"),
-    "relay_outdoor_lights": Relay("Außenlicht"),
-    "relay_cabin": Relay("Finnhuette", initial_state=RelayState.ON),
-    "relay_pool_pump": Relay("Pool Pumpe"),
-    "relay_led_lights": Relay("LED Licht"),
-    "relay_party_lights": Relay("Party Licht", initial_state=RelayState.ON),
-    "relay_cabinet": Relay("Vitrine", initial_state=RelayState.ON),
-    "relay_3dprinter": Relay("3D Drucker"),
-    "relay_boiler": Relay("Wasserboiler"),
+    "relay_pool_lights": Relay("Pool Licht", D11, initial_state=RelayState.OFF),
+    "relay_outdoor_lights": Relay("Außenlicht", D23, initial_state=RelayState.OFF),
+    "relay_cabin": Relay("Finnhuette", D25, initial_state=RelayState.OFF),
+    "relay_pool_pump": Relay("Poolpumpe", D24, initial_state=RelayState.OFF),
+    "relay_led_lights": Relay("LED-Licht", D9, initial_state=RelayState.OFF),
+    "relay_party_lights": Relay("Partylicht", D27, initial_state=RelayState.OFF),
+    "relay_cabinet": Relay("Vitrine", D8, initial_state=RelayState.OFF),
+    "relay_3dprinter": Relay("3D-Drucker", D7, initial_state=RelayState.OFF),
+    "relay_airpurifier": Relay("Luftreiniger", D22, initial_state=RelayState.OFF),
+    "relay_plant_lights": Relay("Pflanzenlicht", D5, initial_state=RelayState.OFF)
+    # "relay_boiler": Relay("Wasserboiler", ),
 }
 
 
@@ -194,7 +196,7 @@ def broadcast_states():
 
 
 shutters: dict[str, ManagedShutter] = {
-    "shutter_main": ManagedShutter("Rollladen", D14, D15, management_state=ManagementState.AUTO)
+    "shutter_main": ManagedShutter("Rollladen", pin_open=D4, pin_close=D17, management_state=ManagementState.AUTO)
 }
 
 

@@ -157,11 +157,11 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) 
 temp_sensors: dict[str, TemperatureSensor] = {
     "sensor_indoor": TemperatureSensor("Innen", SensorTypeTemperature.DHT11, D2),
     # "indoor": Sensor("Innen", SensorType.MOCK),
-    "sensor_outdoor": TemperatureSensor("Außen", SensorTypeTemperature.MOCK)
+    "sensor_outdoor": TemperatureSensor("Außen", SensorTypeTemperature.DHT11, D3)
 }
 
 light_sensors: dict[str, LightSensor] = {
-    "light_outdoor": LightSensor("Außenlicht", sensor_type=SensorTypeLight.MOCK)
+    "light_outdoor": LightSensor("Außenlicht", sensor_type=SensorTypeLight.REAL, pin=D26)
 }
 
 
