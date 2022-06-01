@@ -42,7 +42,7 @@ nano /etc/apache2/sites-available/GardenRemote.conf
 <VirtualHost *:80>
     ServerName pi2laube
     ServerAdmin yourmail@mail.com
-    WSGIScriptAlias / /home/pi/GardenRemote/app/> group=%{GLOBAL} application-group=%{GLOBAL}
+    WSGIScriptAlias / /home/pi/GardenRemote/app/> process-group=%{GLOBAL} application-group=%{GLOBAL}
     <Directory /home/pi/GardenRemote/app/>
         Options Indexes FollowSymLinks
         AllowOverride None
