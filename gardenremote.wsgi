@@ -25,7 +25,8 @@ log_setup(base_path)
 logging.info("Starting application...")
 sys.path.insert(0, base_path)
 # use packages from the virtualenv instead of global
-sys.path.insert(0, base_path + "/venv/lib/python3.9/site-packages")
+version = sys.version_info
+sys.path.insert(0, base_path + f'/venv/lib/python{version.major}.{version.minor}/site-packages')
 
 from app import app as application
 
