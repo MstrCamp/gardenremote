@@ -5,8 +5,8 @@ from flask import render_template, Response
 from werkzeug.exceptions import HTTPException
 
 from app import app
-from gpio.relay import relays, shutters, Relay, RelayState, broadcast_states, ShutterState, ManagedShutter, \
-    broadcast_shutters, ManagementState
+from gpio.relay import relays, shutters, Relay, broadcast_states, ManagedShutter, \
+    broadcast_shutters
 from gpio.sensor import temp_sensors
 from sse.MessageAnnouncer import announcer
 

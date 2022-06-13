@@ -27,9 +27,6 @@ class DHT22(DHTBase):
     pass
 
 
-class TestImport:
-    pass
-
 D0 = Pin(0)
 D1 = Pin(1)
 

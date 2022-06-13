@@ -1,5 +1,5 @@
-from gpio.relay import broadcast_states, shutters, ShutterState
-from gpio.sensor import broadcast_data, light_sensors, LightState, temp_sensors
+from gpio.relay import broadcast_states, shutters
+from gpio.sensor import broadcast_data, light_sensors, temp_sensors
 from . import scheduler
 
 

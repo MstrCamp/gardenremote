@@ -97,7 +97,7 @@ class LightState(Enum):
         return not self.value
 
 
-class MockDigitaInOut:
+class MockDigitalInOut:
     """Mocks the function of a digital input for testing and development purposes"""
 
     # noinspection PyUnusedLocal
@@ -111,7 +111,7 @@ class MockDigitaInOut:
 
 
 class SensorTypeLight(Enum):
-    MOCK = MockDigitaInOut,
+    MOCK = MockDigitalInOut,
     REAL = DigitalInOut
 
     def __init__(self, clazz):
@@ -120,12 +120,12 @@ class SensorTypeLight(Enum):
 
 class LightSensor:
     """Wraps functionality of light sensors to improve reliability of reading values."""
-    s: Union[DigitalInOut, MockDigitaInOut]
+    s: Union[DigitalInOut, MockDigitalInOut]
 
     def __init__(self, name: str, sensor_type: SensorTypeLight = SensorTypeLight.MOCK, pin: Pin = None):
         self.name = name
         if environ.get('SENSORS_UNAVAILABLE') == '1' or pin is None:
-            self.s = MockDigitaInOut()
+            self.s = MockDigitalInOut()
         else:
             self.s = sensor_type.clazz(pin)
 
