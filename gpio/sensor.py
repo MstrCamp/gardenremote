@@ -85,7 +85,7 @@ class TemperatureSensor:
 
 
 class LightState(Enum):
-    NIGHT = False,
+    NIGHT = False
     DAY = True
 
     @property
