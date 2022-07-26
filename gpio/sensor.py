@@ -155,9 +155,9 @@ def _get_value(get: Callable[[], Union[int, float, None]], max_retry: int = 20) 
 
 
 temp_sensors: Dict[str, TemperatureSensor] = {
-    "sensor_indoor": TemperatureSensor("Innen", SensorTypeTemperature.DHT11, D2),
+    "sensor_indoor": TemperatureSensor("Innen", SensorTypeTemperature.DHT22, D2),
     # "indoor": Sensor("Innen", SensorType.MOCK),
-    "sensor_outdoor": TemperatureSensor("Außen", SensorTypeTemperature.DHT11, D3)
+    "sensor_outdoor": TemperatureSensor("Außen", SensorTypeTemperature.DHT22, D3)
 }
 
 light_sensors: Dict[str, LightSensor] = {
