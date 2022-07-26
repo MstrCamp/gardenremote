@@ -44,6 +44,9 @@ class MockDHT:
 
         return random.randrange(0, 100)
 
+    def exit(self):
+        pass
+
 
 class SensorTypeTemperature(Enum):
     MOCK = MockDHT,
@@ -65,6 +68,9 @@ class TemperatureSensor:
             self.s = MockDHT()
         else:
             self.s = sensor_type.clazz(pin)
+
+    def __del__(self):
+        self.s.exit()
 
     @property
     def temperature(self) -> Union[int, float, None]:
