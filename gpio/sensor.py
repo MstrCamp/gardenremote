@@ -64,12 +64,16 @@ class TemperatureSensor:
 
     def __init__(self, name: str, sensor_type: SensorTypeTemperature = SensorTypeTemperature.MOCK, pin: Pin = None):
         self.name = name
+        logging.info(f"Creating Sensor {name}")
         if environ.get('SENSORS_UNAVAILABLE') == '1' or pin is None:
+            logging.info(f"Creating Sensor {name} as Mock sensor")
             self.s = MockDHT()
         else:
+            logging.info(f"Creating Sensor {name} as Real sensor")
             self.s = sensor_type.clazz(pin)
 
     def __del__(self):
+        logging.info(f"Destroying Sensor {self.name}")
         self.s.exit()
 
     @property
